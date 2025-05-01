@@ -9,7 +9,7 @@ client = OpenAI(
     api_key = st.secrets["api_key"],
 )
 
-# Define function to call OpenAI GPT model for dispute classification
+# function to call llm for dispute classification
 def classify_dispute(dispute_description):
     response = client.chat.completions.create(
     messages=[
@@ -30,29 +30,24 @@ def classify_dispute(dispute_description):
 
     return response.choices[0].message.content
 
-# Define function to assign a priority level based on the dispute category
 def assign_priority(dispute_category):
-    # Assign high, medium, low priority based on the dispute type
     priority = {
-        "Unauthorized Transaction": "High",  # High priority for security issues
-        "Duplicate Transaction": "Medium",   # Medium priority for account errors
-        "Amount Error": "Low",               # Low priority for pricing errors
-        "Product Not Received": "Medium"     # Medium priority for non-receipt issues
+        "Unauthorized Transaction": "High",  
+        "Duplicate Transaction": "Medium",   
+        "Amount Error": "Low",               
+        "Product Not Received": "Medium"     
     }
-    return priority.get(dispute_category, "Low")  # Default to low priority if category is unknown
+    return priority.get(dispute_category, "Low") 
 
-# Define function to flag high-risk disputes
 def is_high_risk(dispute_category, dispute_description):
-    # High-risk is typically flagged for unauthorized transactions or large amounts
     if dispute_category == "Unauthorized Transaction":
         return True
     if "large amount" in dispute_description.lower():
         return True
     return False
 
-# Define function to return recommended action based on dispute classification
+# recommended action based on dispute classification
 def get_recommended_action(dispute_category, priority_level):
-    # Depending on the dispute type and priority level, suggest actions
     actions = {
         "High": "Urgently investigate and reverse the transaction. Contact the customer directly to confirm the issue.",
         "Medium": "Review the dispute details and verify transaction data. Reach out to the customer if necessary.",
@@ -60,27 +55,20 @@ def get_recommended_action(dispute_category, priority_level):
     }
     return actions.get(priority_level, "Further review is required.")
 
-# Streamlit app layout
+# Streamlit app 
 st.title("Banking Dispute Classification and Management")
 
 st.header("Please enter the details of your dispute")
 
-# Input field for user to describe the dispute
+# Input field
 dispute_description = st.text_area("Describe your dispute:", height=150)
 
-# Submit button to process the dispute
+# Submit button 
 if st.button("Submit Dispute"):
     if dispute_description:
-        # Step 1: Classify the dispute using AI (GPT model)
         dispute_category = classify_dispute(dispute_description)
-
-        # Step 2: Assign a priority level based on the category
         priority_level = assign_priority(dispute_category)
-
-        # Step 3: Flag high-risk disputes
         high_risk_flag = is_high_risk(dispute_category, dispute_description)
-
-        # Step 4: Return the recommended action based on dispute classification and priority level
         recommended_action = get_recommended_action(dispute_category, priority_level)
 
         # Display the results
